@@ -4,6 +4,7 @@ import http from "http";
 import cors from "cors";
 import { ConnectToSocket } from "./controller/SocketManager";
 import mongoose from "mongoose";
+import userRoutes from "./route/user_routes";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -30,7 +31,7 @@ mongoose.connect(process.env.MONGO_URL as string)
 })
 
 
-// app.use("/api/v1/users" , userRoutes);
+app.use("/api/v1/users" , userRoutes);
 
 const port =process.env.PORT ;
 server.listen(port , ()=>{
