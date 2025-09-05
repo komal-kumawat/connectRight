@@ -1,5 +1,69 @@
-import {Request , Response} from "express";
+import { Request, Response } from "express";
+import httpStatus from "http-status";
+import jwt from 'jsonwebtoken';
+import bcrypt from "bcrypt";
+import dotenv from "dotenv";
+import { User } from "../models/user_models";
+dotenv.config();
 
-const login = async(req:Request , res:Response)=>{
-    
+const JWT_SECRET = process.env.JWT_SECRET as string;
+
+const login = async (req: Request, res: Response): Promise<Response> => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res
+            .status(httpStatus.BAD_REQUEST)
+            .json({ message: "Please provide username and password" });
+    }
+    try {
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res
+                .status(httpStatus.NOT_FOUND)
+                .json({ message: "User not found" });
+        }
+        const isPassword = await bcrypt.compare(password, user.password);
+        if (!isPassword) {
+            return res
+                .status(httpStatus.UNAUTHORIZED)
+                .json({ message: "Invalid credentials" });
+        }
+        const token = jwt.sign(
+            {
+            id: user._id,
+            username: user.username
+            }, JWT_SECRET, { expiresIn: "1h" }
+        );
+        return res.status(httpStatus.OK).json({token});
+        
+
+    } catch (err) {
+        console.error("error while logging in ");
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({err});
+    }
 }
+
+const register = async (req: Request, res: Response): Promise<Response> => {
+    const {name , username , password} = req.body;
+    try{
+        const existingUser = await User.findOne({username});
+        if(existingUser){
+            return res
+                    .status(httpStatus.CONFLICT)
+                    .json({message:"user already exist"});
+        }
+        const hashedPassword = await bcrypt.hash(password,10);
+        const newUser = new User({
+            name , username , password:hashedPassword
+        });
+        await newUser.save();
+        return res
+                .status(httpStatus.CREATED)
+                .json({message:"User created successfully"});
+
+    }catch(err){
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({err});
+    }
+}
+
+export { login, register };

@@ -1,1 +1,1 @@
-{"root":["./src/server.ts","./src/controller/socketmanager.ts"],"version":"5.9.2"}
+{"root":["./src/server.ts","./src/controller/socketmanager.ts","./src/controller/user_controller.ts","./src/models/meeting_models.ts","./src/models/user_models.ts","./src/route/user_routes.ts"],"version":"5.9.2"}
