@@ -29,10 +29,7 @@ mongoose.connect(process.env.MONGO_URL as string)
 })
 
 
-
-app.get("/",(req,res)=>{
-    res.send("server is running");
-})
+app.use("/")
 
 const port =process.env.PORT ;
 server.listen(port , ()=>{
