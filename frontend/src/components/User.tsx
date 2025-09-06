@@ -3,7 +3,7 @@ import React from 'react'
 const User = () => {
     const userName = "Komal";
   return (
-    <div style={{ backgroundColor:'#ececec' , borderRadius:"50px" ,padding:"10px 15px"}}>
+    <div style={{display:'flex',alignItems:'center', backgroundColor:'#ececec' , borderRadius:"50px" ,padding:"2px 15px", fontWeight:'bold'}}>
         {userName[0]}
 
       
