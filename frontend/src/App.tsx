@@ -1,13 +1,50 @@
-// App.jsx
-export default function App() {
+import Container from "./components/Container"
+import Header from "./components/Header"
+import { Bold, Video } from "lucide-react";
+import mainImage from "./assets/mainImage.jpeg";
+import "./App.css"
+import JoinButton from "./components/JoinButton";
+import StartMeetingButton from "./components/StartMeetingButton";
+import MeetingForm from "./components/MeetingForm";
+const App = () => {
   return (
-    <div className="min-h-screen">
-      <h1 className="text-2xl text-center p-4">
-        Hello, World!
-      </h1>
-      <button className="bg-white text-black px-4 py-2 rounded">
-        Click me
-      </button>
+    <div className="app">
+      <Header />
+      <div style={{ width: "100%", marginTop: '120px' }}>
+        <div className="main1" style={{ width: "80%" }}>
+          <div>
+            <div className="content">
+              <h1 style={{ fontSize: '40px', fontWeight: Bold }}>
+                Connect and Collaborate from anywhere
+              </h1>
+              <p>
+                Reliable video conferencing platform for teams of all sizes. Join millions who trust us for seamless communication.
+              </p>
+            </div>
+            <div className="buttons">
+              <JoinButton />
+              <StartMeetingButton />
+
+            </div>
+            <div className="buttons">
+              <MeetingForm />
+            </div>
+          </div>
+
+          <img src={mainImage} alt="Image" width="50%" height="50%"></img>
+        </div>
+        <div className="main-containers" style={{ width: "80%" }}>
+          <Container Image={Video} text="Crystal clear video and audio quality for professional meetings" title="HD Video & Audio" />
+          <Container Image={Video} text="Crystal clear video and audio quality for professional meetings" title="HD Video & Audio" />
+          <Container Image={Video} text="Crystal clear video and audio quality for professional meetings" title="HD Video & Audio" />
+          {/* <Container Image={Video} text="Crystal clear video and audio quality for professional meetings" title="HD Video & Audio" /> */}
+
+        </div>
+
+      </div>
+
     </div>
-  );
+  )
 }
+
+export default App
