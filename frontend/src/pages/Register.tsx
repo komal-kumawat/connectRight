@@ -57,29 +57,23 @@ const Register = () => {
         return;
       }
 
-      // ✅ Save token + username in localStorage (if backend returns them)
-      if (res.data?.token) {
-        // localStorage.setItem("token", res.data.token);
-        // localStorage.setItem("name", res.data.user.name);
+      if (res.data?.token && res.data?.user?.name) {
         login(res.data.user.name, res.data.token);
         setSuccess("Registration successful ✅");
-
-        // Redirect to home/dashboard
         navigate("/");
       } else {
-        // If backend does not return token, just show success and go to login
         setSuccess("Registration successful ✅ Please login.");
         navigate("/login");
       }
 
       setError(null);
-
-      // optional: clear fields
-
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Registration failed ❌");
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || "Registration failed ❌");
+      } else {
+        setError("An unexpected error occurred ❌");
+      }
     } finally {
-
       setLoading(false);
       setName("");
       setEmail("");

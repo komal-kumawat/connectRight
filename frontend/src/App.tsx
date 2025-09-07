@@ -12,7 +12,7 @@ const App = () => {
           <Route path="/" element={<HomePage/>}></Route>
           <Route path="/login" element={<Login/>}></Route>
           <Route path="/register" element = {<Register/>}></Route>
-          <Route path="/videoMeet" element = {<VideoMeet/>}></Route>
+          <Route path="/videoMeet/:meetingId" element = {<VideoMeet/>}></Route>
       </Routes>
     </BrowserRouter>
 

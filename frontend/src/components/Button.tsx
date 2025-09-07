@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 interface IButton {
   color: string;
   bgColor: string;
   text: string;
+  onClick?:()=>void
 }
 
-const Button = ({ color, bgColor, text }: IButton) => {
+const Button = ({ color, bgColor, text , onClick }: IButton) => {
   const [hover, setHover] = useState(false);
 
   return (
@@ -25,6 +26,7 @@ const Button = ({ color, bgColor, text }: IButton) => {
       }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      onClick={onClick}
     >
       {text}
     </div>

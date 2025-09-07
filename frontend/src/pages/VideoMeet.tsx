@@ -63,7 +63,9 @@ const VideoMeet = () => {
         audioTrack.enabled = !audioTrack.enabled;
         setMicOn(audioTrack.enabled);
       }
+      
     }
+    alert(!micOn?"mike on":"mike off")
   };
 
   // Toggle Video
@@ -159,7 +161,7 @@ const VideoMeet = () => {
           autoPlay
           playsInline
           muted
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          style={{ width:chat?'100%':'100%', height: "100%", objectFit: "cover" }}
         />
 
         {/* Controls */}
