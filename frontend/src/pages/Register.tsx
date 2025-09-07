@@ -48,7 +48,7 @@ const Register = () => {
       };
 
       const res = await axios.post(
-        "https://connectlive-cqvv.onrender.com/api/v1/users/register",
+        "http://localhost:3000/api/v1/users/register",
         payload
       );
 
