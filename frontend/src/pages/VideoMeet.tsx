@@ -16,7 +16,7 @@ import StopScreenShareIcon from "@mui/icons-material/StopScreenShare";
 import ChatIcon from "@mui/icons-material/Chat";
 
 // ------------ CONFIG ------------
-const SIGNALING_SERVER_URL = "http://localhost:3000";
+const SIGNALING_SERVER_URL = "https://connectlive-cqvv.onrender.com";
 const ICE_CONFIG: RTCConfiguration = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
 // --------------------------------
 
