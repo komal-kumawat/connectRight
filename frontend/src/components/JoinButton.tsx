@@ -1,9 +1,13 @@
 import React from 'react'
 import Button from './Button'
 
-const JoinButton = () => {
+interface JoinButtonProps {
+  text: string;
+}
+
+const JoinButton = ({text}:JoinButtonProps) => {
     return (
-        <Button color="white" bgColor="black" text="Join Meeting" />
+        <Button color="white" bgColor="black" text={text} />
     )
 }
 

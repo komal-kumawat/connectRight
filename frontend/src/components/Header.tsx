@@ -3,6 +3,7 @@ import Logo from './Logo';
 import User from './User';
 import JoinButton from './JoinButton';
 import StartMeetingButton from './StartMeetingButton';
+import HeaderRight from './HeaderRight';
 
 const Header = () => {
   return (
@@ -30,11 +31,7 @@ const Header = () => {
         }}>
       <Logo />
 
-      <div style={{ display: 'flex', gap: '10px' }}>
-        <JoinButton></JoinButton>
-        <StartMeetingButton/>
-        <User/>
-      </div>
+      <HeaderRight/>
       </div>
     </div>
   );
