@@ -1,8 +1,4 @@
-import React from 'react';
 import Logo from './Logo';
-import User from './User';
-import JoinButton from './JoinButton';
-import StartMeetingButton from './StartMeetingButton';
 import HeaderRight from './HeaderRight';
 
 const Header = () => {

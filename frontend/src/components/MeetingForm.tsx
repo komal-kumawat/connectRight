@@ -1,8 +1,7 @@
-import React, { useState } from 'react'
 import "../styles/MeetingForm.css"
-import JoinButton from './JoinButton'
 import { useNavigate } from 'react-router-dom';
 import Button from './Button';
+import { useState } from "react";
 
 const MeetingForm = () => {
     const [meetingId, setMeetingId] = useState("");

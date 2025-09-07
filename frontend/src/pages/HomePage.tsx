@@ -8,7 +8,6 @@ import LoginButton from "../components/LoginButton";
 import RegisterButton from "../components/RegisterButton";
 import mainImage from "../assets/mainImage.jpeg";
 import { useAuth } from "../context/AuthContext";
-
 const HomePage = () => {
   const { token } = useAuth();
   const isLoggedIn = !!token;
