@@ -1,7 +1,7 @@
 {
-  "name": "backend",
+  "name": "connectlive-backend",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "dist/server.js",
   "scripts": {
     "build": "tsc -b",
     "start": "node dist/server.js",
