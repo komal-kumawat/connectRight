@@ -80,9 +80,19 @@ export default function VideoMeet(): JSX.Element {
   }
 
   function addTracksToPeer(pc: RTCPeerConnection) {
-    localCameraStreamRef.current?.getTracks().forEach((track) => pc.addTrack(track, localCameraStreamRef.current!));
-    localScreenStreamRef.current?.getTracks().forEach((track) => pc.addTrack(track, localScreenStreamRef.current!));
+    // Add camera tracks only if not already added
+    localCameraStreamRef.current?.getTracks().forEach((track) => {
+      const alreadyAdded = pc.getSenders().some(sender => sender.track === track);
+      if (!alreadyAdded) pc.addTrack(track, localCameraStreamRef.current!);
+    });
+
+    // Add screen tracks only if not already added
+    localScreenStreamRef.current?.getTracks().forEach((track) => {
+      const alreadyAdded = pc.getSenders().some(sender => sender.track === track);
+      if (!alreadyAdded) pc.addTrack(track, localScreenStreamRef.current!);
+    });
   }
+
 
   function cleanupPeer(remoteId: string) {
     connectionsRef.current[remoteId]?.close();
@@ -115,8 +125,8 @@ export default function VideoMeet(): JSX.Element {
     const socket = socketRef.current;
 
     socket.on("connect", () => {
-      mySocketIdRef.current = socket.id ||"";
-      
+      mySocketIdRef.current = socket.id || "";
+
       socket.emit("join-call", meetingId);
     });
 
@@ -257,9 +267,9 @@ export default function VideoMeet(): JSX.Element {
               </div>
             )) : <div>No messages yet</div>}
           </div>
-          <div style={{ padding: 12, borderTop: "1px solid #ddd"}}>
-            <form onSubmit={(e) => { e.preventDefault(); sendChat(); }} style={{ display: "flex", gap:6, width:'100%'}}>
-              <input value={messageText} onChange={(e) => setMessageText(e.target.value)} style={{ flex: 1, padding: 6, width:'100%'}} placeholder="Type a message..." />
+          <div style={{ padding: 12, borderTop: "1px solid #ddd" }}>
+            <form onSubmit={(e) => { e.preventDefault(); sendChat(); }} style={{ display: "flex", gap: 6, width: '100%' }}>
+              <input value={messageText} onChange={(e) => setMessageText(e.target.value)} style={{ flex: 1, padding: 6, width: '100%' }} placeholder="Type a message..." />
               <MuiButton type="submit" variant="contained">Send</MuiButton>
             </form>
           </div>
