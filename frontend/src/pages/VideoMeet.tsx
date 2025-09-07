@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type JSX } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import io, { Socket } from "socket.io-client";
 import {
@@ -30,9 +30,11 @@ export default function VideoMeet(): JSX.Element {
   const mySocketIdRef = useRef<string | null>(null);
   const connectionsRef = useRef<Record<string, RTCPeerConnection>>({});
 
-  const localVideoRef = useRef<HTMLVideoElement | null>(null);
-  const localStreamRef = useRef<MediaStream | null>(null);
-  const screenStreamRef = useRef<MediaStream | null>(null);
+  const localCameraRef = useRef<HTMLVideoElement | null>(null);
+  const localScreenRef = useRef<HTMLVideoElement | null>(null);
+
+  const localCameraStreamRef = useRef<MediaStream | null>(null);
+  const localScreenStreamRef = useRef<MediaStream | null>(null);
 
   const storedName = localStorage.getItem("name") || "Guest";
   const [username] = useState(storedName);
@@ -72,17 +74,14 @@ export default function VideoMeet(): JSX.Element {
       setRemoteVideos([...remoteVideosRef.current]);
     };
 
-    localStreamRef.current?.getTracks().forEach((track) => pc.addTrack(track, localStreamRef.current!));
-
+    addTracksToPeer(pc);
     connectionsRef.current[remoteId] = pc;
     return pc;
   }
 
-  async function replaceVideoTrackForAllPeers(newTrack: MediaStreamTrack | null) {
-    for (const pc of Object.values(connectionsRef.current)) {
-      const sender = pc.getSenders().find((s) => s.track?.kind === "video");
-      if (sender) await sender.replaceTrack(newTrack!);
-    }
+  function addTracksToPeer(pc: RTCPeerConnection) {
+    localCameraStreamRef.current?.getTracks().forEach((track) => pc.addTrack(track, localCameraStreamRef.current!));
+    localScreenStreamRef.current?.getTracks().forEach((track) => pc.addTrack(track, localScreenStreamRef.current!));
   }
 
   function cleanupPeer(remoteId: string) {
@@ -95,18 +94,17 @@ export default function VideoMeet(): JSX.Element {
   function cleanupAll() {
     for (const id in connectionsRef.current) { connectionsRef.current[id]?.close(); delete connectionsRef.current[id]; }
     socketRef.current?.disconnect();
-    localStreamRef.current?.getTracks().forEach((t) => t.stop());
-    screenStreamRef.current?.getTracks()?.forEach((t) => t.stop());
-    localStreamRef.current = null;
-    screenStreamRef.current = null;
+    localCameraStreamRef.current?.getTracks().forEach((t) => t.stop());
+    localScreenStreamRef.current?.getTracks()?.forEach((t) => t.stop());
+    localCameraStreamRef.current = null;
+    localScreenStreamRef.current = null;
   }
 
-  // ---------------- Media & Socket ----------------
   async function acquireLocalMedia() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      localStreamRef.current = stream;
-      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+      localCameraStreamRef.current = stream;
+      if (localCameraRef.current) localCameraRef.current.srcObject = stream;
       setCameraOn(true); setMicOn(true);
     } catch { setCameraOn(false); setMicOn(false); }
   }
@@ -117,7 +115,8 @@ export default function VideoMeet(): JSX.Element {
     const socket = socketRef.current;
 
     socket.on("connect", () => {
-      mySocketIdRef.current = socket.id;
+      mySocketIdRef.current = socket.id ||"";
+      
       socket.emit("join-call", meetingId);
     });
 
@@ -151,40 +150,54 @@ export default function VideoMeet(): JSX.Element {
   }
 
   async function joinRoom() { await acquireLocalMedia(); connectToSignalingServer(); }
-
   useEffect(() => { joinRoom(); return () => cleanupAll(); }, []);
 
   // ---------------- Controls ----------------
   const toggleCamera = () => {
-    const track = localStreamRef.current?.getVideoTracks()[0]; if (track) { track.enabled = !track.enabled; setCameraOn(track.enabled); }
+    const track = localCameraStreamRef.current?.getVideoTracks()[0]; if (track) { track.enabled = !track.enabled; setCameraOn(track.enabled); }
   };
   const toggleMic = () => {
-    const track = localStreamRef.current?.getAudioTracks()[0]; if (track) { track.enabled = !track.enabled; setMicOn(track.enabled); }
+    const track = localCameraStreamRef.current?.getAudioTracks()[0]; if (track) { track.enabled = !track.enabled; setMicOn(track.enabled); }
   };
 
   const startScreenShare = async () => {
     if (screenSharing) {
-      screenStreamRef.current?.getTracks().forEach((t) => t.stop());
-      screenStreamRef.current = null;
-      const cameraTrack = localStreamRef.current?.getVideoTracks()[0] ?? null;
-      await replaceVideoTrackForAllPeers(cameraTrack);
-      if (localVideoRef.current) localVideoRef.current.srcObject = localStreamRef.current;
+      localScreenStreamRef.current?.getTracks().forEach((t) => t.stop());
+      localScreenStreamRef.current = null;
+      // Remove screen tracks from all peers
+      for (const pc of Object.values(connectionsRef.current)) {
+        pc.getSenders()
+          .filter(s => s.track?.kind === "video")
+          .forEach(sender => pc.removeTrack(sender));
+        addTracksToPeer(pc); // Re-add camera track
+      }
+      if (localScreenRef.current) localScreenRef.current.srcObject = null;
+      if (localCameraRef.current) localCameraRef.current.srcObject = localCameraStreamRef.current;
       setScreenSharing(false);
       return;
     }
 
     try {
       const displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      localScreenStreamRef.current = displayStream;
       const screenTrack = displayStream.getVideoTracks()[0];
-      screenStreamRef.current = displayStream;
 
-      await replaceVideoTrackForAllPeers(screenTrack);
-      if (localVideoRef.current) localVideoRef.current.srcObject = displayStream;
+      for (const pc of Object.values(connectionsRef.current)) {
+        displayStream.getTracks().forEach(track => pc.addTrack(track, displayStream));
+      }
 
-      screenTrack.onended = async () => {
-        const cameraTrack = localStreamRef.current?.getVideoTracks()[0] ?? null;
-        await replaceVideoTrackForAllPeers(cameraTrack);
-        if (localVideoRef.current) localVideoRef.current.srcObject = localStreamRef.current;
+      if (localScreenRef.current) localScreenRef.current.srcObject = displayStream;
+
+      screenTrack.onended = () => {
+        localScreenStreamRef.current = null;
+        for (const pc of Object.values(connectionsRef.current)) {
+          pc.getSenders()
+            .filter(s => s.track?.kind === "video" && displayStream.getTracks().includes(s.track))
+            .forEach(sender => pc.removeTrack(sender));
+          addTracksToPeer(pc); // Re-add camera
+        }
+        if (localScreenRef.current) localScreenRef.current.srcObject = null;
+        if (localCameraRef.current) localCameraRef.current.srcObject = localCameraStreamRef.current;
         setScreenSharing(false);
       };
 
@@ -205,12 +218,22 @@ export default function VideoMeet(): JSX.Element {
     <div style={{ display: "flex", height: "100vh", width: "100%" }}>
       {/* Left: Video area */}
       <div style={{ flex: 3, position: "relative", background: "black" }}>
-        <video ref={localVideoRef} autoPlay playsInline muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        {screenSharing ? (
+          <video ref={localScreenRef} autoPlay playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        ) : (
+          <video ref={localCameraRef} autoPlay playsInline muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        )}
+
+        {screenSharing && (
+          <video ref={localCameraRef} autoPlay playsInline muted style={{ width: 200, height: 150, position: "absolute", bottom: 20, right: 20, borderRadius: 8, border: "2px solid white" }} />
+        )}
+
         <div style={{ position: "absolute", top: 10, right: 10, display: "grid", gap: 8, gridTemplateColumns: "repeat(2, 120px)" }}>
           {remoteVideos.map((rv) => (
             <video key={rv.socketId} autoPlay playsInline ref={(el) => { if (el) el.srcObject = rv.stream; }} style={{ width: 120, height: 80, objectFit: "cover", background: "#000", borderRadius: 6 }} />
           ))}
         </div>
+
         <div style={{ position: "absolute", bottom: 20, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 15 }}>
           <IconButton onClick={toggleMic} style={buttonStyle}>{micOn ? <MicIcon /> : <MicOffIcon />}</IconButton>
           <IconButton onClick={toggleCamera} style={buttonStyle}>{cameraOn ? <VideocamIcon /> : <VideocamOffIcon />}</IconButton>
@@ -235,16 +258,8 @@ export default function VideoMeet(): JSX.Element {
             )) : <div>No messages yet</div>}
           </div>
           <div style={{ padding: 12, borderTop: "1px solid #ddd"}}>
-            <form
-              onSubmit={(e) => { e.preventDefault(); sendChat(); }}
-              style={{ display: "flex",gap:6, width:'100%'}}
-            >
-              <input
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                style={{ flex: 1, padding: 6, width:'100%'}}
-                placeholder="Type a message..."
-              />
+            <form onSubmit={(e) => { e.preventDefault(); sendChat(); }} style={{ display: "flex", gap:6, width:'100%'}}>
+              <input value={messageText} onChange={(e) => setMessageText(e.target.value)} style={{ flex: 1, padding: 6, width:'100%'}} placeholder="Type a message..." />
               <MuiButton type="submit" variant="contained">Send</MuiButton>
             </form>
           </div>

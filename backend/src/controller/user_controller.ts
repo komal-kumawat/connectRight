@@ -32,7 +32,7 @@ const login = async (req: Request, res: Response): Promise<Response> => {
             {
                 id: user._id,
                 username: user.username
-            }, JWT_SECRET, { expiresIn: "1h" }
+            }, JWT_SECRET, { expiresIn: "24h" }
         );
         return res.status(httpStatus.OK).json({
             token,
@@ -73,7 +73,7 @@ const register = async (req: Request, res: Response): Promise<Response> => {
     const token = jwt.sign(
       { id: newUser._id, username: newUser.username },
       JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
 
     return res.status(httpStatus.CREATED).json({
