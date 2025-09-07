@@ -7,18 +7,17 @@ import Hero from "../components/Hero";
 import LoginButton from "../components/LoginButton";
 import RegisterButton from "../components/RegisterButton";
 import mainImage from "../assets/mainImage.jpeg";
+import { useAuth } from "../context/AuthContext";
 
 const HomePage = () => {
-  const token = localStorage.getItem("token");
+  const { token } = useAuth();
   const isLoggedIn = !!token;
 
   return (
     <div className="app">
       <Header />
-
       <div style={{ width: "100%", marginTop: "120px" }}>
         {isLoggedIn ? (
-          // ✅ Logged In -> Dashboard Hero
           <Hero
             title="Connect and Collaborate from anywhere"
             description="Reliable video conferencing platform for teams of all sizes. Join millions who trust us for seamless communication."
@@ -28,7 +27,6 @@ const HomePage = () => {
             meetingForm={true}
           />
         ) : (
-          // ❌ Not Logged In -> Landing Page Hero
           <Hero
             title="Welcome to Our Platform"
             description="Seamless video conferencing made simple. Get started today!"

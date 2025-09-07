@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -11,6 +12,7 @@ const Register = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const validate = () => {
@@ -57,8 +59,9 @@ const Register = () => {
 
       // ✅ Save token + username in localStorage (if backend returns them)
       if (res.data?.token) {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("username", res.data.user?.name || name);
+        // localStorage.setItem("token", res.data.token);
+        // localStorage.setItem("name", res.data.user.name);
+        login(res.data.user.name, res.data.token);
         setSuccess("Registration successful ✅");
 
         // Redirect to home/dashboard
@@ -72,13 +75,15 @@ const Register = () => {
       setError(null);
 
       // optional: clear fields
-      setName("");
-      setEmail("");
-      setPassword("");
+
     } catch (err: any) {
       setError(err.response?.data?.message || "Registration failed ❌");
     } finally {
+
       setLoading(false);
+      setName("");
+      setEmail("");
+      setPassword("");
     }
   };
 

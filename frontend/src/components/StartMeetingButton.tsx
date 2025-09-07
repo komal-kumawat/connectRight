@@ -3,7 +3,7 @@ import Button from './Button'
 
 const StartMeetingButton = () => {
     return (
-        <Button color="black" bgColor="white" text="Start Meeting" />
+        <Button color="white" bgColor="#28a745" text="Start Meeting" />
 
     )
 }

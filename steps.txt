@@ -191,7 +191,23 @@ stun servers are lightweight servers running on public internet which return the
 - create the enviornment.tsx file for deploying on server 
 
 
+WHAT IS STUN SERVER??
+ans . 🛰️ STUN Server = "What’s my public IP?"
 
+STUN stands for Session Traversal Utilities for NAT.
+It’s a lightweight server that helps clients discover:
+
+Their public IP address.
+
+The type of NAT they’re behind.
+
+Which port is mapped for sending/receiving data.
+
+So when a WebRTC client connects to a STUN server, it basically asks:
+
+“Hey, what’s my public IP and port from your point of view?”
+
+And the STUN server replies with your public-facing IP and port.
 
 
 

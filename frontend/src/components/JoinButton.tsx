@@ -7,7 +7,7 @@ interface JoinButtonProps {
 
 const JoinButton = ({text}:JoinButtonProps) => {
     return (
-        <Button color="white" bgColor="black" text={text} />
+        <Button color="white" bgColor="#007bff"  text={text} />
     )
 }
 

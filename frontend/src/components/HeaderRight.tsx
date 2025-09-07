@@ -5,32 +5,26 @@ import StartMeetingButton from "./StartMeetingButton";
 import { User } from "lucide-react";
 import LoginButton from "./LoginButton";
 import RegisterButton from "./RegisterButton";
+import { useAuth } from "../context/AuthContext";
 
 const HeaderRight = () => {
-  const token = localStorage.getItem("token");
-  const username = localStorage.getItem("username"); // assuming you store username after login
-  const isLoggedIn = !!token;
-
+  const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    navigate("/"); // redirect to home
+    logout();
+    navigate("/");
   };
 
   return (
     <div style={{ display: "flex", gap: "10px", alignItems: "center", position: "relative" }}>
-      {isLoggedIn ? (
+      {user ? (
         <>
           <JoinButton text="Join Meeting" />
           <StartMeetingButton />
           <div style={{ position: "relative" }}>
-            <User
-              style={{ cursor: "pointer" }}
-              onClick={() => setMenuOpen(!menuOpen)}
-            />
+            <User style={{ cursor: "pointer" }} onClick={() => setMenuOpen(!menuOpen)} />
             {menuOpen && (
               <div
                 style={{
@@ -46,7 +40,7 @@ const HeaderRight = () => {
                 }}
               >
                 <p style={{ margin: "0 0 10px 0", fontWeight: "bold" }}>
-                  {username || "User"}
+                  {user}
                 </p>
                 <button
                   onClick={handleLogout}
